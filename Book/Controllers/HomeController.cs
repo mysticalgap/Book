@@ -6,32 +6,83 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-
+using Microsoft.EntityFrameworkCore;
+using Book.Models;
 namespace Book.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
+        private BookContext db;
+        public HomeController(BookContext context)
         {
-            _logger = logger;
+            db = context;
         }
-
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
+        {
+            return View(await db.Books.ToListAsync());
+        }
+        public IActionResult Create()
         {
             return View();
         }
-
-        public IActionResult Privacy()
+        [HttpPost]
+        public async Task<IActionResult> Create(Books book)
         {
-            return View();
+            db.Books.Add(book);
+            await db.SaveChangesAsync();
+            return RedirectToAction("Index");
+        }
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id != null)
+            {
+                Books book = await db.Books.FirstOrDefaultAsync(p => p.Id == id);
+                if (book != null)
+                    return View(book);
+            }
+            return NotFound();
+        }
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id != null)
+            {
+                Books book = await db.Books.FirstOrDefaultAsync(p => p.Id == id);
+                if (book != null)
+                    return View(book);
+            }
+            return NotFound();
+        }
+        [HttpPost]
+        public async Task<IActionResult> Edit(Books book)
+        {
+            db.Books.Update(book);
+            await db.SaveChangesAsync();
+            return RedirectToAction("Index");
+        }
+        [HttpGet]
+        [ActionName("Delete")]
+        public async Task<IActionResult> ConfirmDelete(int? id)
+        {
+            if (id != null)
+            {
+                Books book = await db.Books.FirstOrDefaultAsync(p => p.Id == id);
+                if (book != null)
+                    return View(book);
+            }
+            return NotFound();
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        [HttpPost]
+        public async Task<IActionResult> Delete(int? id)
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            if (id != null)
+            {
+                Books book = new Books { Id = id.Value };
+                db.Entry(book).State = EntityState.Deleted;
+                await db.SaveChangesAsync();
+                return RedirectToAction("Index");
+            }
+            return NotFound();
         }
     }
 }

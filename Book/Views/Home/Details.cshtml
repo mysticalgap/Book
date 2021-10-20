@@ -1,0 +1,17 @@
+﻿@model Book.Models.Books
+@{
+    ViewBag.Title = Model.Name;
+}
+<h2>Книга @Model.Name</h2>
+<div>
+    <dl class="dl-horizontal">
+        <dt>Идентификатор</dt>
+        <dd>@Model.Id</dd>
+
+        <dt>Год выпуска</dt>
+        <dd>@Model.Year</dd>
+
+        <dt>Идентификатор автора</dt>
+        <dd>@Model.AuthorId</dd>
+    </dl>
+</div>
